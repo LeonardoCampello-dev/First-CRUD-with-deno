@@ -1,4 +1,4 @@
-import { Iuser } from "../model/user";
+import { Iuser } from "../model/user.ts";
 
 let users: Array<Iuser> = [
   {
@@ -9,14 +9,14 @@ let users: Array<Iuser> = [
     updated_at: new Date("2021-03-02"),
   },
   {
-    id: "1",
+    id: "2",
     name: "Bianca Trader",
     email: "biancatrader@gmail.com",
     created_at: new Date("2021-03-01"),
     updated_at: new Date("2021-03-02"),
   },
   {
-    id: "1",
+    id: "3",
     name: "Gabriela Radiologia",
     email: "gabrielaradiologia  @gmail.com",
     created_at: new Date("2021-03-01"),
@@ -28,4 +28,39 @@ const getUsers = ({ response }: { response: any }) => {
   response.body = users;
 };
 
-export { getUsers };
+const getUser = ({
+  params,
+  response,
+}: {
+  params: { id: string };
+  response: any;
+}) => {
+  const { id } = params;
+  const user: Iuser | undefined = users.find((user) => user.id === id);
+
+  if (user) {
+    response.status = 200;
+    response.body = user;
+  } else {
+    response.status = 404;
+    response.body = { message: "User not found" };
+  }
+};
+
+const addUser = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  const body = await request.body();
+  const user: Iuser = body.value;
+
+  users.push(user);
+
+  response.body = { message: "OK" };
+  response.status = 200;
+};
+
+export { getUsers, getUser, addUser };
