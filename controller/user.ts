@@ -26,6 +26,7 @@ let users: Array<Iuser> = [
 
 const getUsers = ({ response }: { response: any }) => {
   response.body = users;
+  response.status = 200;
 };
 
 const getUser = ({
@@ -39,11 +40,11 @@ const getUser = ({
   const user: Iuser | undefined = users.find((user) => user.id === id);
 
   if (user) {
-    response.status = 200;
     response.body = user;
+    response.status = 200;
   } else {
-    response.status = 404;
     response.body = { message: "User not found" };
+    response.status = 404;
   }
 };
 
@@ -55,12 +56,61 @@ const addUser = async ({
   response: any;
 }) => {
   const body = await request.body();
-  const user: Iuser = body.value;
+  const user: Iuser = await body.value;
 
   users.push(user);
 
-  response.body = { message: "OK" };
+  response.body = { message: "user created successfully" };
   response.status = 200;
 };
 
-export { getUsers, getUser, addUser };
+const updateUser = async ({
+  params,
+  request,
+  response,
+}: {
+  params: { id: string };
+  request: any;
+  response: any;
+}) => {
+  const { id } = params;
+
+  let user: Iuser | undefined = users.find((user) => user.id === id);
+
+  if (user) {
+    const body = await request.body();
+    const updateUser: { name?: string; email?: string } = await body.value;
+
+    user = { ...user, ...updateUser, updated_at: new Date() };
+    users = [...users.filter((user) => user.id !== id), user];
+
+    response.body = { message: "user updated successfully" };
+    response.status = 200;
+  } else {
+    response.body = { message: "user not found" };
+    response.status = 404;
+  }
+};
+
+const deleteUser = ({
+  params,
+  response,
+}: {
+  params: { id: string };
+  response: any;
+}) => {
+  const { id } = params;
+
+  if (id) {
+    const userIndex = users.findIndex((user) => user.id === id);
+    users.splice(userIndex, 1);
+
+    response.body = { message: "user successfully deleted" };
+    response.status = 200;
+  } else {
+    response.body = { message: "user not found" };
+    response.status = 400;
+  }
+};
+
+export { getUsers, getUser, addUser, updateUser, deleteUser };
